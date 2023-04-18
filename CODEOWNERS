@@ -1,0 +1,29 @@
+/frontend/ @AsheshL @sidwac @ba-amit @Ajith-Pandian
+/frontend/app/alignx-app/src/ba-components/ @sidwac @AsheshL @ba-amit @Ajith-Pandian
+/frontend/app/alignx-app/.eslintrc.js @AsheshL
+/services/salesforce/ @rohanbhagwat-ba @ba-amit
+/services/heimdall/ @ba-nitesh @ba-amit @AsheshL
+/services/account/ @rohanbhagwat-ba @ba-amit
+/services/picasso/ @ba-nitesh @ba-amit
+/services/iris/ @ba-amit @sumit-ba @anuj1508
+/services/usp/ @rohanbhagwat-ba @ba-amit
+/services/alignx/ @ba-nitesh @ba-amit
+/services/authorization/ @rohanbhagwat-ba @ba-amit
+/services/usp/ @ba-nitesh @ba-amit
+/services/annotation/ @ba-nitesh @ba-amit
+/services/plutus/ @ba-nitesh @ba-amit
+/services/methodology/ @ba-amit @sumit-ba
+/.github/ @ba-amit @AsheshL @aadiupa
+/libs/ @rohanbhagwat-ba @ba-amit @ba-nitesh @sumit-ba
+/frontend/app/alignx-app/src/generated-types/ @ba-nitesh @ba-amit @AsheshL
+/yarn.lock @ba-amit @rohanbhagwat-ba @AsheshL @sumit-ba @sidwac @Ajith-Pandian
+*.tf @aadiupa
+/devops_scripts/ @aadiupa @ba-amit
+/services/audit/ @ba-amit @ba-nitesh @sumit-ba @anuj1508
+/services/kairos @ba-amit @sumit-ba @rohanbhagwat-ba
+serverless.yml @aadiupa
+/libs/service-types/src/events/ @ba-amit @sumit-ba @anuj1508
+/services/alignx/src/event-models/ @sumit-ba @anuj1508
+/services/analytics/  @ba-amit @ba-nitesh @sumit-ba @anuj1508
+/services/hydra/  @ba-amit @ba-nitesh @rohanbhagwat-ba
+/services/graph/  @ba-amit @ba-nitesh @rohanbhagwat-ba

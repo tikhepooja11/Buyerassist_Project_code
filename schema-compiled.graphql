@@ -1,0 +1,2163 @@
+type MspTrackCounts {
+  total: Int!
+  onTrack: Int!
+  offTrack: Int!
+}
+
+union MspTrackCountsResponse = MspTrackCounts | GraphqlError
+
+type MspPublishStatus {
+  drafts: Int!
+  published: Int!
+}
+
+union MspPublishStatusResponse = MspPublishStatus | GraphqlError
+
+type DashboardFilter {
+  key: String
+  displayName: String
+  values: [String]
+}
+
+union DashboardFilterResponse = DashboardFilter | GraphqlError
+
+type DashboardFilterPayload {
+  items: [DashboardFilterResponse!]
+}
+
+union DashboardFilterPayloadResponse = DashboardFilterPayload | GraphqlError
+
+type OpportunityCountsAtStage {
+  stageName: String!
+  counts: Int!
+}
+
+union OpportunityCountsAtStageResponse = OpportunityCountsAtStage | GraphqlError
+
+type OpportunityCountsAtStagePayload {
+  items: [OpportunityCountsAtStageResponse!]
+}
+
+union OpportunityCountsAtStagePayloadResponse = OpportunityCountsAtStagePayload | GraphqlError
+
+type AlignxAnalytics {
+  mspTrackCounts: MspTrackCountsResponse!
+  mspPublishStatus: MspPublishStatusResponse!
+  opportunityCountsAtStage(stageNames: [String!]!): OpportunityCountsAtStagePayloadResponse!
+}
+
+union AlignxAnalyticsResponse = AlignxAnalytics | GraphqlError
+
+type DashboardColumn {
+  displayName: String!
+  isVisible: Boolean!
+  key: String
+  isSortable: Boolean!
+  order: Int
+}
+
+union DashboardColumnResponse = DashboardColumn | GraphqlError
+
+type DashboardColumnPayload {
+  items: [DashboardColumnResponse!]
+}
+
+union DashboardColumnPayloadResponse = DashboardColumnPayload | GraphqlError
+
+type Alignx {
+  msps(pageConfiguration: PageConfiguration, operations: Operations): MspConnectionResponse!
+  analytics: AlignxAnalyticsResponse!
+  dashboardFilters: DashboardFilterPayloadResponse
+  dashboardFiltersV1: FilterItemsPayloadResponse
+  dashboardColumns: DashboardColumnPayloadResponse
+}
+
+union AlignxResponse = Alignx | GraphqlError
+
+type AlignxQuery {
+  dashboard: AlignxResponse!
+}
+
+enum AnnotationType {
+  COMMENTS
+  NOTES
+}
+
+enum ReferenceType {
+  METHODOLOGY_QUALIFIER
+  NOTES
+  TASKS
+}
+
+input ReferenceInput {
+  id: ID!
+  type: ReferenceType!
+}
+
+interface Annotation {
+  id: ID!
+  reference: Reference!
+  annotationType: AnnotationType!
+  createdBy: UserResponse!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+}
+
+type Reference {
+  id: ID!
+  type: ReferenceType!
+}
+
+type CommentEdge {
+  cursor: String!
+  node: CommentResponse
+}
+
+type CommentConnection {
+  edges: [CommentEdge]
+  pageInfo: PageInfo!
+  totalCount: Int
+}
+
+union CommentConnectionResponse = CommentConnection | GraphqlError
+
+type Notes implements Annotation {
+  id: ID!
+  reference: Reference!
+  annotationType: AnnotationType!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+  createdBy: UserResponse!
+  comments(pageConfiguration: PageConfiguration, operations: Operations): CommentConnectionResponse
+}
+
+type MessageData {
+  message: String!
+  isEdited: Boolean!
+  editedAt: Timestamp
+}
+
+type Comment implements Annotation {
+  id: ID!
+  reference: Reference!
+  annotationType: AnnotationType!
+  messageData: MessageData!
+  createdBy: UserResponse!
+  media(pageConfiguration: PageConfiguration, operations: Operations): MediaConnectionResponse
+  updatedAt: Timestamp!
+  createdAt: Timestamp!
+  isInternal: Boolean
+}
+
+union CommentResponse = Comment | GraphqlError
+
+type CommentPayload {
+  items: [CommentResponse!]
+}
+
+union CommentPayloadResponse = CommentPayload | GraphqlError
+
+union NotesResponse = Notes | GraphqlError
+
+input AddCommentInput {
+  reference: ReferenceInput!
+  annotationType: AnnotationType!
+  message: String!
+  media: [CreateMediaInput!]
+}
+
+input UpdateCommentInput {
+  id: ID!
+  message: String!
+  media: [CreateMediaInput!]!
+}
+
+type AnnotationMutation {
+  addComment(input: AddCommentInput!): CommentPayloadResponse!
+  updateComment(input: UpdateCommentInput!): CommentPayloadResponse!
+  removeComment(id: ID!): BooleanResponse!
+}
+
+type Audio implements Media & Assets {
+  id: ID!
+  orgId: ID!
+  createdBy: UserResponse!
+  name: String
+  fileName: String
+  fileSize: Int
+  description: String
+  mediaType: MediaType!
+  url: URL!
+  formats: JSON
+  context: MediaContextResponse
+  thumbnail: Thumbnail
+  mimeType: String
+  source: String
+  createdAt: Timestamp!
+  analytics: MediaAnalyticsResponse
+  isInternal: Boolean
+}
+
+type Company {
+  id: ID!
+  orgId: ID!
+  companyName: String!
+  displayName: String!
+  logo: LogoResponse
+  createdAt: Timestamp!
+}
+
+union CompanyResponse = Company | GraphqlError
+
+type CompanyEdge {
+  cursor: String!
+  node: CompanyResponse
+}
+
+type CompanyConnection {
+  edges: [CompanyEdge]
+  pageInfo: PageInfo!
+  totalCount: Int
+}
+
+union CompanyConnectionResponse = CompanyConnection | GraphqlError
+
+type CompanyQuery {
+  searchCompany(pageConfiguration: PageConfiguration, operations: Operations!): CompanyConnectionResponse!
+}
+
+directive @constraint(
+  minLength: Int
+  maxLength: Int
+  startsWith: String
+  endsWith: String
+  notContains: String
+  pattern: String
+  format: String
+  min: Int
+  max: Int
+  exclusiveMin: Int
+  exclusiveMax: Int
+  multipleOf: Int
+) on INPUT_FIELD_DEFINITION
+
+scalar EmailAddress
+
+scalar URL
+
+scalar Timestamp
+
+scalar JSON
+
+type Document implements Media & Assets {
+  id: ID!
+  orgId: ID!
+  createdBy: UserResponse!
+  name: String
+  fileName: String
+  fileSize: Int
+  description: String
+  mediaType: MediaType!
+  url: URL!
+  formats: JSON
+  thumbnail: Thumbnail
+  context: MediaContextResponse
+  mimeType: String
+  source: String
+  createdAt: Timestamp!
+  analytics: MediaAnalyticsResponse
+  isInternal: Boolean
+}
+
+enum ErrorType {
+  BAD_REQUEST_ERROR
+  FORBIDDEN_ERROR
+  INTERNAL_SERVER_ERROR
+  NOT_FOUND_ERROR
+  UNAUTHORIZED_ERROR
+}
+
+type GraphqlError {
+  type: ErrorType!
+  code: String!
+  message: String!
+  helpLink: URL
+}
+
+type FilterItems {
+  key: String!
+  isVisible: Boolean!
+  displayName: String!
+  values: [JSON!]
+  order: Int
+}
+
+type FilterItemsPayload {
+  items: [FilterItems!]
+}
+
+union FilterItemsPayloadResponse = FilterItemsPayload | GraphqlError
+
+type Image implements Media & Assets {
+  id: ID!
+  orgId: ID!
+  createdBy: UserResponse!
+  name: String
+  fileName: String
+  fileSize: Int
+  description: String
+  mediaType: MediaType!
+  url: URL!
+  formats: JSON
+  context: MediaContextResponse
+  thumbnail: Thumbnail
+  mimeType: String
+  source: String
+  analytics: MediaAnalyticsResponse
+  createdAt: Timestamp!
+  isInternal: Boolean
+}
+
+type Link implements Media {
+  id: ID!
+  orgId: ID!
+  createdBy: UserResponse!
+  name: String
+  fileName: String
+  fileSize: Int
+  description: String
+  mediaType: MediaType!
+  link: URL!
+  url: URL! @deprecated(reason: "Remove this field")
+  thumbnail: Thumbnail
+  mimeType: String
+  source: String
+  analytics: MediaAnalyticsResponse
+  createdAt: Timestamp!
+  isInternal: Boolean
+}
+
+type Logo implements Media {
+  id: ID!
+  orgId: ID!
+  createdBy: UserResponse!
+  name: String
+  fileName: String
+  fileSize: Int
+  description: String
+  mediaType: MediaType!
+  url: URL!
+  isInternal: Boolean @deprecated(reason: "Remove this field")
+  formats: JSON
+  mimeType: String
+  source: String
+  createdAt: Timestamp!
+  analytics: MediaAnalyticsResponse
+}
+
+union LogoResponse = Logo | GraphqlError
+
+type Meddic implements Node {
+  id: ID!
+  mspId: ID!
+  metrics: MethodologyStringQualifier
+  economicBuyer: MethodologyUserQualifier
+  decisionCriteria: MethodologyStringQualifier
+  decisionProcess: MethodologyStringQualifier
+  identifiedPain: MethodologyStringQualifier
+  champion: MethodologyUserQualifier
+  analytics: MethodologyAnalyticsResponse
+}
+
+union MeddicResponse = Meddic | GraphqlError
+
+type MeddicPayload {
+  items: [MeddicResponse!]
+}
+
+union MeddicPayloadResponse = MeddicPayload | GraphqlError
+
+input UpdateMeddicInput {
+  metrics: UpdateMethodologyQualifierAttributesInput
+  economicBuyer: UpdateMethodologyQualifierUserInput
+  decisionCriteria: UpdateMethodologyQualifierAttributesInput
+  decisionProcess: UpdateMethodologyQualifierAttributesInput
+  identifiedPain: UpdateMethodologyQualifierAttributesInput
+  champion: UpdateMethodologyQualifierUserInput
+}
+
+input SyncMeddicInput {
+  qualifiers: [String]!
+}
+
+type MeddicQualifierComment {
+  qualifierId: String
+  comments: CommentConnectionResponse
+}
+
+type MeddicQualifierCommentPayload {
+  items: [MeddicQualifierComment]
+}
+
+union MeddicQualifierCommentPayloadResponse = MeddicQualifierCommentPayload | GraphqlError
+
+type MeddicQuery {
+  getMeddicForMsp(mspId: ID!): MeddicPayloadResponse!
+  getMeddicComments(qualifierIds: [ID!]!): MeddicQualifierCommentPayloadResponse
+}
+
+type MeddicMutation {
+  updateMeddic(mspId: ID!, input: UpdateMeddicInput!): MeddicPayloadResponse!
+  syncMeddic(mspId: ID!, input: SyncMeddicInput!): MeddicPayloadResponse!
+}
+
+type Meddpicc implements Node {
+  id: ID!
+  mspId: ID!
+  metrics: MethodologyStringQualifier
+  economicBuyer: MethodologyUserQualifier
+  decisionCriteria: MethodologyStringQualifier
+  decisionProcess: MethodologyStringQualifier
+  paperProcess: MethodologyTaskQualifier
+  identifiedPain: MethodologyStringQualifier
+  champion: MethodologyUserQualifier
+  competition: MethodologyStringQualifier
+  analytics: MethodologyAnalyticsResponse
+}
+
+union MeddpiccResponse = Meddpicc | GraphqlError
+
+type MeddpiccPayload {
+  items: [MeddpiccResponse!]
+}
+
+union MeddpiccPayloadResponse = MeddpiccPayload | GraphqlError
+
+input UpdateMeddpiccInput {
+  metrics: UpdateMethodologyQualifierAttributesInput
+  economicBuyer: UpdateMethodologyQualifierUserInput
+  decisionCriteria: UpdateMethodologyQualifierAttributesInput
+  decisionProcess: UpdateMethodologyQualifierAttributesInput
+  paperProcess: UpdateMethodologyQualifierTaskInput
+  identifiedPain: UpdateMethodologyQualifierAttributesInput
+  champion: UpdateMethodologyQualifierUserInput
+  competition: UpdateMethodologyQualifierStringInput
+}
+
+input SyncMeddpiccInput {
+  qualifiers: [String]!
+}
+
+type MeddpiccQualifierComment {
+  qualifierId: String
+  comments: CommentConnectionResponse
+}
+
+type MeddpiccQualifierCommentPayload {
+  items: [MeddpiccQualifierComment]
+}
+
+union MeddpiccQualifierCommentPayloadResponse = MeddpiccQualifierCommentPayload | GraphqlError
+
+type MeddpiccQuery {
+  getMeddpiccForMsp(mspId: ID!): MeddpiccPayloadResponse!
+  getMeddpiccComments(qualifierIds: [ID!]!): MeddpiccQualifierCommentPayloadResponse
+}
+
+type MeddpiccMutation {
+  updateMeddpicc(mspId: ID!, input: UpdateMeddpiccInput!): MeddpiccPayloadResponse!
+  syncMeddpicc(mspId: ID!, input: SyncMeddpiccInput!): MeddpiccPayloadResponse!
+}
+
+enum MediaType {
+  AUDIO
+  IMAGE
+  LINK
+  LOGO
+  PDF
+  THUMBNAIL
+  VIDEO
+  ZIP
+}
+
+input CreateLinkInput {
+  link: URL!
+  name: String
+}
+
+input CreateAssetsInput {
+  path: String!
+  fileName: String!
+  mimeType: String!
+  fileSize: Int!
+}
+
+input CreateMediaInput {
+  uploadId: ID
+  linkInput: CreateLinkInput
+  assetsInput: CreateAssetsInput
+  source: String!
+  description: String
+  mediaType: MediaType!
+  path: String @deprecated(reason: "Access this field inside input field `assetsInput=> path`")
+  fileName: String @deprecated(reason: "Access this field inside input field `assetsInput=> fileName`")
+  mimeType: String @deprecated(reason: "Access this field inside input field `assetsInput=> mimeType`")
+  fileSize: Int @deprecated(reason: "Access this field inside input field `assetsInput=> fileSize`")
+}
+
+input AttachMediaInput {
+  scopeId: ID!
+  referenceId: ID!
+  referenceType: ObjectType!
+  isInternal: Boolean
+}
+
+input ReplaceAttachedMediaInput {
+  detachInput: DetachMediaInput!
+  mediaInput: CreateMediaInput!
+  attachInput: AttachMediaInput!
+}
+
+input UpdateMediaInput {
+  description: String!
+}
+
+input CreateAndAttachMediaInput {
+  mediaInput: [CreateMediaInput!]!
+  attachInput: AttachMediaInput!
+}
+
+input DetachMediaInput {
+  referenceId: ID @deprecated(reason: "Pass mediaId only")
+  mediaId: ID!
+}
+
+type MediaBelongsTo {
+  id: ID!
+  name: String!
+  displayName: String!
+  objectType: String!
+}
+
+union BelongsToResponse = MediaBelongsTo | GraphqlError
+
+type MediaAnalytics {
+  belongsTo: BelongsToResponse
+}
+
+union MediaAnalyticsResponse = MediaAnalytics | GraphqlError
+
+interface Media {
+  id: ID!
+  orgId: ID!
+  createdBy: UserResponse!
+  name: String
+  description: String
+  mediaType: MediaType!
+  mimeType: String
+  createdAt: Timestamp!
+  fileName: String
+    @deprecated(reason: "Access this field on specific media type(Image, Audio, Video, ..) `...on Image {fileName}`.")
+  fileSize: Int
+    @deprecated(reason: "Access this field on specific media type(Image, Audio, Video, ..) `...on Image {fileSize}`.")
+  url: URL!
+    @deprecated(reason: "Access this field on specific media type(Image, Audio, Video, ..) `...on Image {url}`.")
+  source: String
+    @deprecated(reason: "Access this field on specific media type(Image, Audio, Video, ..) `...on Image {source}`.")
+  analytics: MediaAnalyticsResponse
+    @deprecated(reason: "Access this field on specific media type(Image, Audio, Video, ..) `...on Image {analytics}`.")
+  isInternal: Boolean
+    @deprecated(reason: "Access this field on specific media type(Image, Audio, Video, ..) `...on Image {isInternal}`.")
+}
+
+type MediaContext {
+  isPin: Boolean
+  isFavorite: Boolean
+}
+
+union MediaContextResponse = MediaContext | GraphqlError
+
+interface Assets implements Media {
+  id: ID!
+  orgId: ID!
+  createdBy: UserResponse!
+  name: String
+  fileName: String
+  fileSize: Int
+  description: String
+  mediaType: MediaType!
+  context: MediaContextResponse
+  url: URL!
+  formats: JSON
+  thumbnail: Thumbnail
+  mimeType: String
+  source: String
+  createdAt: Timestamp!
+  analytics: MediaAnalyticsResponse
+  isInternal: Boolean
+}
+
+type MediaPayloadItem {
+  item: Media!
+}
+
+union MediaResponse = MediaPayloadItem | GraphqlError
+
+type MediaEdge {
+  cursor: String!
+  node: MediaResponse
+}
+
+type MediaConnection {
+  edges: [MediaEdge]
+  pageInfo: PageInfo!
+  totalCount: Int
+}
+
+union MediaConnectionResponse = MediaConnection | GraphqlError
+
+type AttachMedia {
+  scopeId: ID!
+  mediaId: ID!
+  referenceId: ID!
+  referenceType: ObjectType!
+}
+
+union AttachMediaResponse = AttachMedia | GraphqlError
+
+type AttachMediaPayload {
+  items: [AttachMediaResponse!]
+}
+
+type MediaPayload {
+  items: [MediaResponse!]
+}
+
+union AttachMediaPayloadResponse = AttachMediaPayload | GraphqlError
+
+union MediaPayloadResponse = MediaPayload | GraphqlError
+
+type DetachMedia {
+  mediaId: ID!
+  referenceId: ID @deprecated(reason: "Pass mediaId only")
+}
+
+input MarkMediaInternalInput {
+  referenceId: ID @deprecated(reason: "Pass mediaId only")
+  mediaIds: [ID!]!
+  isInternal: Boolean!
+}
+
+input FavoriteMediaInput {
+  mediaIds: [ID!]!
+}
+
+input UnfavoriteMediaInput {
+  mediaIds: [ID!]!
+}
+
+input PinMediaInput {
+  mediaIds: [ID!]!
+  contextId: ID!
+}
+
+input UnpinMediaInput {
+  mediaIds: [ID!]!
+  contextId: ID!
+}
+
+union DetachMediaResponse = DetachMedia | GraphqlError
+
+type MediaMutation {
+  createAndAttachMedia(input: CreateAndAttachMediaInput!): MediaPayloadResponse!
+  updateMedia(mediaId: ID!, input: UpdateMediaInput!): MediaPayloadResponse!
+  attachMedia(mediaIds: [ID!]!, input: AttachMediaInput!): AttachMediaPayloadResponse!
+  replaceAttachedMedia(input: ReplaceAttachedMediaInput!): MediaPayloadResponse!
+  detachMedia(input: DetachMediaInput!): DetachMediaResponse!
+  markMediaInternal(input: MarkMediaInternalInput!): BooleanResponse!
+  favoriteMedia(input: FavoriteMediaInput!): BooleanResponse!
+  unfavoriteMedia(input: UnfavoriteMediaInput!): BooleanResponse!
+  pinMedia(input: PinMediaInput!): BooleanResponse!
+  unpinMedia(input: UnpinMediaInput!): BooleanResponse!
+}
+
+type MediaQuery {
+  listMedia(pageConfiguration: PageConfiguration, operations: Operations!): MediaConnectionResponse
+  mediaFilters(operations: Operations!): FilterItemsPayloadResponse!
+  myFavoriteMedia(pageConfiguration: PageConfiguration, operations: Operations): MediaConnectionResponse
+  pinnedMedia(pageConfiguration: PageConfiguration, operations: Operations): MediaConnectionResponse
+}
+
+input PlaceholderInput {
+  name: String!
+  description: String
+}
+
+input AddStakeHolderToRoleInput {
+  scopeId: ID!
+  roleId: ID!
+  stakeholderIdMap: UserIdMapInput!
+}
+
+input CreateAndAssignStakeholderToRoleInput {
+  scopeId: ID!
+  roleId: ID!
+  userInput: CreateUserInput!
+}
+
+input CreateAndAssignPlaceholderToRoleInput {
+  scopeId: ID!
+  roleId: ID!
+  companyType: CompanyType!
+  placeholderInput: PlaceholderInput!
+}
+
+input RemoveStakeholderFromRoleInput {
+  scopeId: ID!
+  roleId: ID!
+  stakeholderId: ID!
+}
+
+input RemovePlaceholderFromRoleInput {
+  scopeId: ID!
+  roleId: ID!
+  placeholderId: ID!
+}
+
+input ReplacePlaceholderWithStakeholderInput {
+  scopeId: ID!
+  roleId: ID!
+  placeholderId: ID!
+  stakeholderIdMap: UserIdMapInput!
+}
+
+input ReplaceStakeholderInput {
+  previousStakeholderIdMap: UserIdMapInput!
+  currentStakeholderIdMap: UserIdMapInput!
+}
+
+type Placeholder {
+  id: ID!
+  orgId: ID!
+  name: String!
+  description: String
+  createdAt: Timestamp!
+  companyType: CompanyType
+}
+
+type Stakeholder implements IUser {
+  id: ID
+  primaryId: ID
+  firstName: String
+  lastName: String
+  company: CompanyResponse
+  email: EmailAddress!
+}
+
+union StakeholderResponse = Stakeholder | GraphqlError
+
+type Members {
+  stakeholders: [StakeholderResponse!]
+  placeholders: [PlaceholderResponse!]
+}
+
+type AddOrRemoveStakeholderResponse {
+  roleId: ID!
+  stakeholderId: ID!
+}
+
+type AddOrRemovePlaceholderResponse {
+  roleId: ID!
+  placeholderId: ID!
+}
+
+type AddOrRemoveStakeholderPayload {
+  items: [AddOrRemoveStakeholderResponse!]
+}
+
+type AddOrRemovePlaceholderPayload {
+  items: [AddOrRemovePlaceholderResponse!]
+}
+
+union PlaceholderResponse = Placeholder | GraphqlError
+
+type PlaceholderEdge {
+  cursor: String!
+  node: PlaceholderResponse
+}
+
+type PlaceholderConnection {
+  edges: [PlaceholderEdge]
+  pageInfo: PageInfo!
+  totalCount: Int
+}
+
+union MembersResponse = Members | GraphqlError
+
+union AddOrRemoveStakeholderRoleResponse = AddOrRemoveStakeholderPayload | GraphqlError
+
+union AddOrRemovePlaceholderRoleResponse = AddOrRemovePlaceholderPayload | GraphqlError
+
+union PlaceholderConnectionResponse = PlaceholderConnection | GraphqlError
+
+type MemberQuery {
+  listPlaceholders(pageConfiguration: PageConfiguration, operations: Operations): PlaceholderConnectionResponse!
+}
+
+type MemberMutation {
+  createAndAssignPlaceholderToRole(input: CreateAndAssignPlaceholderToRoleInput!): AddOrRemovePlaceholderRoleResponse!
+  createAndAssignPlaceholdersToRoles(
+    input: [CreateAndAssignPlaceholderToRoleInput!]!
+  ): AddOrRemovePlaceholderRoleResponse!
+  removePlaceholderFromRole(input: RemovePlaceholderFromRoleInput!): BooleanResponse!
+  removePlaceholdersFromRoles(input: [RemovePlaceholderFromRoleInput!]!): BooleanResponse!
+  createAndAssignStakeholderToRole(input: CreateAndAssignStakeholderToRoleInput!): UserPayloadResponse!
+  addStakeholderToRole(input: AddStakeHolderToRoleInput!): AddOrRemoveStakeholderRoleResponse!
+  addStakeholdersToRoles(input: [AddStakeHolderToRoleInput!]!): AddOrRemoveStakeholderRoleResponse!
+  replacePlaceholderWithStakeholder(input: ReplacePlaceholderWithStakeholderInput!): BooleanResponse!
+  replaceStakeholder(input: ReplaceStakeholderInput!): BooleanResponse!
+  removeStakeholderFromRole(input: RemoveStakeholderFromRoleInput!): BooleanResponse!
+  removeStakeholdersFromRoles(input: [RemoveStakeholderFromRoleInput!]!): BooleanResponse!
+}
+
+type MethodologyQualifierNotes {
+  value: String!
+}
+
+type MethodologyAnalytics {
+  lastUpdatedAt: Timestamp!
+  lastSyncedAt: Timestamp
+  isSynced: Boolean!
+  isSyncEnabled: Boolean!
+  syncDisableReason: String
+  firstSyncDone: Boolean!
+}
+
+type MethodologyQualifierAnalytics {
+  lastUpdatedAt: Timestamp!
+  lastSyncedAt: Timestamp
+  isSynced: Boolean!
+}
+
+union MethodologyAnalyticsResponse = MethodologyAnalytics | GraphqlError
+
+interface MethodologyQualifierData {
+  id: ID!
+  notes: [MethodologyQualifierNotes]!
+  score: Int
+}
+
+type MethodologyStringQualifierData implements MethodologyQualifierData {
+  id: ID!
+  data: String
+  notes: [MethodologyQualifierNotes]!
+  score: Int
+}
+
+type MethodologyUserQualifierData implements MethodologyQualifierData {
+  id: ID!
+  data: [UserResponse]
+  notes: [MethodologyQualifierNotes]!
+  score: Int
+}
+
+type MethodologyTaskQualifierData implements MethodologyQualifierData {
+  id: ID!
+  data: [TaskResponse]
+  notes: [MethodologyQualifierNotes]!
+  score: Int
+}
+
+type MethodologyStringQualifier {
+  current: MethodologyStringQualifierData
+  salesforce: MethodologyStringQualifierData
+  comments: CommentConnectionResponse
+  analytics: MethodologyQualifierAnalytics
+}
+
+type MethodologyUserQualifier {
+  current: MethodologyUserQualifierData
+  salesforce: MethodologyUserQualifierData
+  comments: CommentConnectionResponse
+  analytics: MethodologyQualifierAnalytics
+}
+
+type MethodologyTaskQualifier {
+  current: MethodologyTaskQualifierData
+  salesforce: MethodologyTaskQualifierData
+  comments: CommentConnectionResponse
+  analytics: MethodologyQualifierAnalytics
+}
+
+input UpdateMethodologyQualifierNotesInput {
+  value: String
+}
+
+input UpdateMethodologyQualifierUserDataInputPayload {
+  id: ID
+  primaryId: ID
+}
+
+input UpdateMethodologyQualifierTaskDataInputPayload {
+  id: String
+}
+
+input UpdateMethodologyQualifierStringInput {
+  data: String
+  notes: [UpdateMethodologyQualifierNotesInput]
+  score: Int
+}
+
+input UpdateMethodologyQualifierUserInput {
+  data: [UpdateMethodologyQualifierUserDataInputPayload]
+  notes: [UpdateMethodologyQualifierNotesInput]
+  score: Int
+}
+
+input UpdateMethodologyQualifierTaskInput {
+  data: [UpdateMethodologyQualifierTaskDataInputPayload]
+  notes: [UpdateMethodologyQualifierNotesInput]
+  score: Int
+}
+
+input UpdateMethodologyQualifierAttributesInput {
+  notes: [UpdateMethodologyQualifierNotesInput]
+  score: Int
+}
+
+union MethodologyResponse = Meddic | Meddpicc | GraphqlError
+
+type MethodologyPayload {
+  items: [MethodologyResponse!]
+}
+
+interface IMilestone {
+  id: ID!
+  name: String!
+  startDate: Int!
+  endDate: Int!
+  createdAt: Int!
+}
+
+input CreateMilestoneInput {
+  mspId: ID!
+  name: String!
+  startDate: Int!
+  endDate: Int!
+  media: [CreateMediaInput!]
+  isInternal: Boolean
+}
+
+input UpdateMilestoneInput {
+  name: String
+  startDate: Int
+  endDate: Int
+}
+
+input MarkMilestoneInternalInput {
+  milestoneIds: [ID!]!
+  isInternal: Boolean!
+}
+
+input MilestoneDetailsInput {
+  goals: String
+  riskDependencies: String
+  successCriteria: String
+}
+
+type MilestoneTasksProgressStatus {
+  total: Int!
+  completed: Int!
+  pending: Int!
+}
+
+union MilestoneTasksProgressStatusResponse = MilestoneTasksProgressStatus | GraphqlError
+
+type MilestoneAnalytics {
+  progressStatus: MilestoneTasksProgressStatusResponse
+}
+
+union MilestoneAnalyticsResponse = MilestoneAnalytics | GraphqlError
+
+type MilestoneDetails {
+  milestoneId: ID!
+  goals: String
+  riskDependencies: String
+  successCriteria: String
+}
+
+type BaseMilestone implements IMilestone {
+  id: ID!
+  name: String!
+  startDate: Int!
+  endDate: Int!
+  createdAt: Int!
+}
+
+type Milestone implements IMilestone {
+  id: ID!
+  name: String!
+  startDate: Int!
+  endDate: Int!
+  milestoneDetails: MilestoneDetailsResponse
+  analytics: MilestoneAnalyticsResponse
+  tasks(pageConfiguration: PageConfiguration, operations: Operations): TaskConnectionResponse!
+  media(pageConfiguration: PageConfiguration, operations: Operations): MediaConnectionResponse
+  createdAt: Int!
+  isInternal: Boolean!
+}
+
+union MilestoneDetailsResponse = MilestoneDetails | GraphqlError
+
+type MilestoneDetailsPayload {
+  items: [MilestoneDetailsResponse!]
+}
+
+union MilestoneDetailsPayloadResponse = MilestoneDetailsPayload | GraphqlError
+
+union MilestoneResponse = Milestone | BaseMilestone | GraphqlError
+
+type MilestonePayload {
+  items: [MilestoneResponse!]
+}
+
+union MilestonePayloadResponse = MilestonePayload | GraphqlError
+
+type MilestoneEdge {
+  cursor: String!
+  node: MilestoneResponse
+}
+
+type MilestoneConnection {
+  edges: [MilestoneEdge]
+  pageInfo: PageInfo!
+  totalCount: Int
+}
+
+union MilestoneConnectionResponse = MilestoneConnection | GraphqlError
+
+type MilestoneQuery {
+  listMilestones(pageConfiguration: PageConfiguration, operations: Operations): MilestoneConnectionResponse!
+  getMilestones(ids: [ID!]!): MilestonePayloadResponse!
+  getMilestoneDetails(milestoneId: ID!): MilestoneDetailsPayloadResponse!
+}
+
+type MilestoneMutation {
+  createMilestone(input: CreateMilestoneInput!, isTemplate: Boolean): MilestonePayloadResponse!
+  updateMilestone(id: ID!, input: UpdateMilestoneInput!): MilestonePayloadResponse!
+  deleteMilestone(id: ID!): BooleanResponse!
+  upsertMilestoneDetails(milestoneId: ID!, input: MilestoneDetailsInput!): MilestoneDetailsPayloadResponse!
+  cloneMilestone(id: ID!): MilestonePayloadResponse!
+  markMilestonesInternal(input: MarkMilestoneInternalInput): BooleanResponse!
+}
+
+enum MspTrackStatus {
+  OFF_TRACK
+  ON_TRACK
+  UNKNOWN
+}
+
+enum MspInvitePermission {
+  ALL
+  EDIT
+  NONE
+  VIEW
+  COMMENT
+}
+
+enum MspSubscriberStatus {
+  ADDED
+  INVITED
+  OWNER
+  CO_OWNER
+}
+
+enum MspStage {
+  ARCHIVED
+  DRAFT
+  PUBLISHED
+}
+
+enum MspStatus {
+  AT_RISK
+  OFF_TRACK
+  ON_TRACK
+}
+
+interface IMsp {
+  id: ID!
+  opportunityId: ID
+  name: String!
+  description: String
+  isPublished: Boolean!
+  startDate: Int!
+  closeDate: Int!
+  createdAt: Int!
+}
+
+input CreateExecutiveSummaryInput {
+  description: String
+  media: [CreateMediaInput!]
+}
+
+input UpdateExecutiveSummaryInput {
+  description: String!
+}
+
+input CreateMspInput {
+  opportunityId: ID
+  accountId: ID
+  name: String!
+  summary: CreateExecutiveSummaryInput
+  description: String
+  economicImpact: String
+  decisionCriteria: String
+  buyerCompanyId: ID
+  sellerCompanyId: ID
+  buyerCompanyName: String
+  buyerCompanyDisplayName: String
+  buyerCompanyLogo: CreateMediaInput
+  startDate: Int!
+  closeDate: Int!
+  media: [CreateMediaInput!]
+  ownerId: ID
+}
+
+input UpdateMspInput {
+  name: String
+  description: String
+  summary: UpdateExecutiveSummaryInput
+  decisionCriteria: String
+  economicImpact: String
+  startDate: Int
+  closeDate: Int
+  goLiveDate: Int
+  contractSignatureDate: Int
+  vendorChoiceDate: Int
+  isReverseTimeLineEnabled: Boolean
+  ownerId: ID
+  isArchived: Boolean
+}
+
+input TransferOwnershipInput {
+  transfereeId: ID!
+  transferredToId: ID!
+}
+
+input LinkOpportunityInput {
+  mspId: ID!
+  opportunityId: ID!
+  accountId: ID!
+}
+
+type MspTrack {
+  mspTrackStatus: MspTrackStatus!
+  behindBy: Int
+}
+
+union MspTrackResponse = MspTrack | GraphqlError
+
+type MspAnalytics {
+  track: MspTrackResponse!
+  mspStage: MspStage
+  mspStatus: MspStatus
+  mspProgress: Int
+  lastActivityAt: Timestamp
+  lastExternalActivityAt: Timestamp
+}
+
+type Subscriber {
+  user: UserResponse!
+  status: MspSubscriberStatus!
+  permission: MspInvitePermission
+}
+
+union SubscriberResponse = Subscriber | GraphqlError
+
+union MspPermissionResponse = MspPermissionPayload | GraphqlError
+
+union MspUserBridgeResponse = MspUserBridge | GraphqlError
+
+type SubscriberEdge {
+  cursor: String
+  node: SubscriberResponse
+}
+
+type SubscriberConnection {
+  edges: [SubscriberEdge]
+  pageInfo: PageInfo!
+  totalCount: Int
+}
+
+union SubscriberConnectionResponse = SubscriberConnection | GraphqlError
+
+type MspKeyDates {
+  goLiveDate: Int
+  contractSignatureDate: Int
+  vendorChoiceDate: Int
+}
+
+union MspKeyDatesResponse = MspKeyDates | GraphqlError
+
+type ExecutiveSummary {
+  id: ID!
+  description: String
+  media(pageConfiguration: PageConfiguration, operations: Operations): MediaConnectionResponse
+}
+
+type MspId implements Node {
+  id: ID!
+}
+
+type MspPermissionPayload {
+  items: [MspInvitePermission!]!
+}
+
+type MspUserBridge {
+  permissions: MspPermissionResponse!
+  role: Roles!
+}
+
+type BaseMsp implements IMsp {
+  id: ID!
+  opportunityId: ID
+  name: String!
+  description: String
+  isPublished: Boolean!
+  createdBy: UserResponse!
+  startDate: Int!
+  closeDate: Int!
+  createdAt: Int!
+  economicImpact: String
+  buyerCompany: CompanyResponse!
+}
+
+type Msp implements IMsp {
+  id: ID!
+  opportunityId: ID @deprecated(reason: "Use `opportunity=> id`.")
+  opportunity: OpportunityResponse
+  name: String!
+  description: String
+  summary: ExecutiveSummary
+  decisionCriteria: String
+  economicImpact: String
+  buyerCompany: CompanyResponse!
+  sellerCompany: CompanyResponse!
+  isPublished: Boolean!
+  isOwner: Boolean
+  createdBy: UserResponse! @deprecated(reason: "Use `owner`.")
+  sharedBy: UserResponse
+  keyDates: MspKeyDatesResponse
+  startDate: Int!
+  closeDate: Int!
+  createdAt: Int!
+  analytics: MspAnalytics
+  milestones(pageConfiguration: PageConfiguration, operations: Operations): MilestoneConnectionResponse!
+  subscribers(pageConfiguration: PageConfiguration): SubscriberConnectionResponse!
+  media(pageConfiguration: PageConfiguration, operations: Operations): MediaConnectionResponse
+  usps: UpsPayloadResponse!
+  userBridge: MspUserBridgeResponse
+  isReverseTimeLineEnabled: Boolean!
+  owner: UserResponse
+}
+
+union MspResponse = Msp | BaseMsp | GraphqlError
+
+union MspIdResponse = MspId | GraphqlError
+
+type MspEdge {
+  cursor: String!
+  node: MspResponse
+}
+
+type MspConnection {
+  edges: [MspEdge]
+  pageInfo: PageInfo!
+  totalCount: Int
+}
+
+union MspConnectionResponse = MspConnection | GraphqlError
+
+type MspPayload {
+  items: [MspResponse!]
+}
+
+union MspPayloadResponse = MspPayload | GraphqlError
+
+type ToggleMspArchiveResponse {
+  id: ID!
+  mspStage: MspStage!
+}
+
+type ToggleMspArchivePayload {
+  items: [ToggleMspArchiveResponse!]
+}
+
+union ToggleMspsArchivalResponse = ToggleMspArchivePayload | GraphqlError
+
+type UserReferenceMspContext implements IMsp {
+  id: ID!
+  opportunityId: ID
+  name: String!
+  description: String
+  isPublished: Boolean!
+  isOwner: Boolean
+  createdBy: UserResponse!
+  startDate: Int!
+  closeDate: Int!
+  createdAt: Int!
+  economicImpact: String
+  buyerCompany: CompanyResponse!
+  tasks: TaskConnectionResponse
+  roles: RoleConnectionResponse
+  methodology: MethodologyPayload
+}
+
+union UserReferenceMspContextResponse = UserReferenceMspContext | GraphqlError
+
+type UserReferenceMspContextPayload {
+  items: [UserReferenceMspContextResponse]
+}
+
+type UserReferenceResponse {
+  mspsContext: UserReferenceMspContextPayload
+}
+
+union UserReferencesPayloadResponse = UserReferenceResponse | GraphqlError
+
+type MspQuery {
+  getMsp(id: ID!): MspPayloadResponse!
+  listMsps(pageConfiguration: PageConfiguration, operations: Operations): MspConnectionResponse!
+  searchUsersInMsp(pageConfiguration: PageConfiguration, operations: Operations): UserConnectionResponse!
+  getMspIdForOpportunity(oppId: ID!): MspIdResponse!
+  getUserReferences(operations: Operations): UserReferencesPayloadResponse!
+}
+
+type MspMutation {
+  createMsp(input: CreateMspInput!, isTemplate: Boolean): MspPayloadResponse!
+  updateMsp(id: ID!, input: UpdateMspInput!): MspPayloadResponse!
+  deleteMsp(id: ID!): BooleanResponse!
+  publishMsp(id: ID!): BooleanResponse!
+  linkOpportunity(input: LinkOpportunityInput!): BooleanResponse!
+  transferOwnership(id: ID!, input: TransferOwnershipInput!): BooleanResponse!
+}
+
+input InviteInput {
+  userIds: [ID] @deprecated(reason: "Use `userIdMaps=> id`.")
+  userIdMaps: [UserIdMapInput]
+  mspId: ID!
+  permission: MspInvitePermission!
+  notification: NotificationInput
+}
+
+input UpdatePermissionInput {
+  userId: ID!
+  mspId: ID!
+  permission: MspInvitePermission!
+}
+
+input NotificationInput {
+  notify: Boolean!
+  message: String
+  copyMe: Boolean!
+}
+
+input RevokePermissionInput {
+  userId: ID!
+  mspId: ID @deprecated(reason: "remove form input and read it form header")
+}
+
+union MspInvite = UserIdMap | GraphqlError
+
+type MspInviteResponse {
+  items: [MspInvite]
+}
+
+union MspInvitePayloadResponse = MspInviteResponse | GraphqlError
+
+type MspInviteMutation {
+  invite(input: InviteInput!): MspInvitePayloadResponse!
+  updatePermission(input: UpdatePermissionInput!): BooleanResponse!
+  revokePermission(input: RevokePermissionInput!): BooleanResponse!
+}
+
+type Mutation {
+  mediaMutation: MediaMutation
+  organizationMutation: OrganizationMutation
+  userMutation: UserMutation
+  templateMutation: TemplateMutation
+  annotationMutation: AnnotationMutation
+  mspMutation: MspMutation
+  milestoneMutation: MilestoneMutation
+  taskMutation: TaskMutation
+  mspInviteMutation: MspInviteMutation
+  uspMutation: UspMutation
+  roleMutation: RoleMutation
+  memberMutation: MemberMutation
+  meddicMutation: MeddicMutation
+  meddpiccMutation: MeddpiccMutation
+  preferenceMutation: PreferenceMutation
+}
+
+interface Node {
+  id: ID!
+}
+
+enum ObjectType {
+  COMMENT
+  COMPANY
+  MILESTONE
+  MSP
+  MSP_SUMMARY
+  TASK
+}
+
+enum Operator {
+  AND
+  OR
+}
+
+enum Operation {
+  EQ
+  EXISTS
+  GE
+  GT
+  IN
+  LE
+  LIKE
+  LT
+  MATCH
+  NE
+  NULL
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+input Filter {
+  op: Operation!
+  values: [String!]!
+  field: String!
+}
+
+input FiltersExpression {
+  operator: Operator!
+  filters: [Filter!]
+  childExpressions: [FiltersExpression!]
+}
+
+input SortExpression {
+  order: SortOrder!
+  field: String!
+}
+
+input Operations {
+  filter: FiltersExpression
+  sort: [SortExpression!]
+}
+
+type Opportunity {
+  id: ID!
+  accountId: String!
+  contactId: String!
+  ownerId: String!
+  name: String!
+  description: String
+  stageName: String!
+  amount: Int!
+  closeDate: Timestamp
+  type: String
+  isClosed: Boolean!
+  isWon: Boolean!
+  forecastCategory: String!
+  createdAt: Timestamp!
+  fiscal: Timestamp
+}
+
+union OpportunityResponse = Opportunity | GraphqlError
+
+type OpportunityEdge {
+  cursor: String!
+  node: OpportunityResponse
+}
+
+type OpportunityConnection {
+  edges: [OpportunityEdge]
+  pageInfo: PageInfo!
+  totalCount: Int
+}
+
+union OpportunityConnectionResponse = OpportunityConnection | GraphqlError
+
+type OpportunityQuery {
+  listOpportunity(pageConfiguration: PageConfiguration, operations: Operations): OpportunityConnectionResponse!
+}
+
+enum OrgType {
+  CUSTOMER
+  DEV
+  PROD
+  TEST
+}
+
+enum CompanyState {
+  DISABLED
+  ENABLED
+  MAINTENANCE
+}
+
+enum MethodologyTypes {
+  MEDDIC
+  MEDDPICC
+}
+
+input SalesforceConfigInput {
+  isEnabled: Boolean
+  qualifiedStageNames: [String]
+}
+
+input BrandingHeaderInput {
+  color: String
+  textColor: String
+}
+
+input BrandingConfigInput {
+  header: BrandingHeaderInput
+}
+
+input MethodologyConfigInput {
+  isEnabled: Boolean = false
+  displayName: String
+  templateId: ID!
+  type: MethodologyTypes
+}
+
+input OrgConfigInput {
+  others: JSON
+  salesforce: SalesforceConfigInput
+  branding: BrandingConfigInput
+  methodology: MethodologyConfigInput
+}
+
+input OrgLogoInput {
+  original: URL
+  favicon: URL
+}
+
+input CreateOrganizationInput {
+  orgId: ID!
+  orgName: String!
+  orgType: OrgType!
+  orgLogo: OrgLogoInput
+  configs: OrgConfigInput!
+  state: CompanyState!
+}
+
+input UpdateOrganizationInput {
+  orgLogo: OrgLogoInput
+  configs: OrgConfigInput!
+  state: CompanyState
+  orgType: OrgType
+}
+
+type BrandingHeader {
+  color: String
+  textColor: String
+}
+
+type BrandingConfig {
+  header: BrandingHeader
+}
+
+type SalesforceConfig {
+  isEnabled: Boolean
+  qualifiedStageNames: [String]
+}
+
+type MethodologyConfig {
+  isEnabled: Boolean
+  displayName: String
+  templateId: ID!
+  type: String
+}
+
+type OrgConfig {
+  others: JSON
+  salesforce: SalesforceConfig
+  branding: BrandingConfig
+  methodology: MethodologyConfig
+}
+
+type OrgLogo {
+  original: URL
+  favicon: URL
+}
+
+type Organization {
+  id: ID!
+  orgId: ID!
+  orgName: String!
+  orgLogo: OrgLogo
+  orgType: OrgType!
+  configs: OrgConfig!
+  state: CompanyState!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+}
+
+union OrganizationResponse = Organization | GraphqlError
+
+type OrganizationPayload {
+  items: [OrganizationResponse!]
+}
+
+union OrganizationPayloadResponse = OrganizationPayload | GraphqlError
+
+type OrganizationQuery {
+  getOrganization(orgId: ID!): OrganizationPayloadResponse!
+}
+
+type OrganizationMutation {
+  createOrganization(input: CreateOrganizationInput!): OrganizationPayloadResponse!
+  updateOrganization(orgId: ID!, input: UpdateOrganizationInput!): OrganizationPayloadResponse!
+}
+
+input PageConfiguration {
+  limit: Int @constraint(min: 0, max: 100)
+  afterCursor: String
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  afterCursor: String
+  beforeCursor: String
+}
+
+enum NotificationScopeType {
+  COMPANY
+  MSP
+  ORG
+  USER
+}
+
+enum NotificationEntityType {
+  MSP
+}
+
+enum NotificationChannels {
+  EMAIL
+  SLACK
+}
+
+input NotificationEntityPreferenceInput {
+  entityType: NotificationEntityType!
+  entityId: String!
+  isNotificationEnabled: Boolean!
+}
+
+input NotificationPreferenceScopeInput {
+  scopeType: NotificationScopeType!
+  scopeId: String!
+}
+
+input NotificationChannelPreferenceInput {
+  type: NotificationChannels!
+  isEnabled: Boolean!
+}
+
+input NotificationScopePreferenceInput {
+  channels: [NotificationChannelPreferenceInput!]!
+  entity: [NotificationEntityPreferenceInput]
+}
+
+input CreateNotificationPreferenceInput {
+  preferences: NotificationScopePreferenceInput!
+  event: String!
+  scopeId: String!
+  scopeType: NotificationScopeType!
+}
+
+input NotificationPreferenceRequest {
+  scopes: [NotificationPreferenceScopeInput!]!
+  event: String!
+}
+
+input CreateNotificationPreferenceRequestBody {
+  notificationPreferences: [CreateNotificationPreferenceInput!]!
+}
+
+type NotificationScopePreference {
+  channels: [NotificationChannelPreference]
+  entity: [NotificationEntityPreference]
+}
+
+type NotificationChannelPreference {
+  type: NotificationChannels!
+  isEnabled: Boolean!
+}
+
+type NotificationEntityPreference {
+  entityType: NotificationEntityType!
+  entityId: String!
+  isNotificationEnabled: Boolean!
+}
+
+type NotificationPreferenceEntity {
+  id: ID!
+  orgId: ID!
+  scopeType: NotificationScopeType!
+  scopeId: ID!
+  event: String!
+  preferences: NotificationScopePreference!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+  version: Int
+}
+
+union NotificationPreferenceResponse = NotificationChannelPreference | GraphqlError
+
+type NotificationChannelPreferencePayload {
+  items: [NotificationPreferenceResponse!]!
+}
+
+union NotificationChannelPreferencePayloadResponse = NotificationChannelPreferencePayload | GraphqlError
+
+union NotificationPreferenceEntityResponse = NotificationPreferenceEntity | GraphqlError
+
+type NotificationPreferenceEntityPayload {
+  items: [NotificationPreferenceEntityResponse!]!
+}
+
+union NotificationPreferenceEntityPayloadResponse = NotificationPreferenceEntityPayload | GraphqlError
+
+type PreferenceQuery {
+  getPreferences(input: NotificationPreferenceRequest!): NotificationChannelPreferencePayloadResponse!
+}
+
+type PreferenceMutation {
+  createPreferences(input: CreateNotificationPreferenceRequestBody!): NotificationPreferenceEntityPayloadResponse!
+}
+
+type Query {
+  organizationQuery: OrganizationQuery
+  opportunityQuery: OpportunityQuery
+  templateQuery: TemplateQuery
+  userQuery: UserQuery
+  alignxQuery: AlignxQuery
+  mspQuery: MspQuery
+  milestoneQuery: MilestoneQuery
+  taskQuery: TaskQuery
+  mediaQuery: MediaQuery
+  roleQuery: RoleQuery
+  companyQuery: CompanyQuery
+  meddicQuery: MeddicQuery
+  meddpiccQuery: MeddpiccQuery
+  memberQuery: MemberQuery
+  preferenceQuery: PreferenceQuery
+}
+
+type BooleanObject {
+  id: ID!
+  success: Boolean!
+}
+
+union BooleanResponse = BooleanObject | GraphqlError
+
+type IntObject {
+  value: Int!
+}
+
+union IntResponse = IntObject | GraphqlError
+
+enum RoleScope {
+  MSP
+  ORG
+  TEMPLATE
+}
+
+enum CompanyType {
+  BUYER
+  SELLER
+}
+
+input CreateRoleInput {
+  scopeId: ID!
+  scopeType: RoleScope!
+  companyType: CompanyType!
+  name: String!
+  description: String
+  isHidden: Boolean
+  order: Int
+}
+
+input UpdateRoleInput {
+  name: String
+  isHidden: Boolean
+}
+
+type RoleMembers {
+  buyerMembers: MembersResponse
+  sellerMembers: MembersResponse
+}
+
+union RoleMembersResponse = RoleMembers | GraphqlError
+
+type Role {
+  id: ID!
+  orgId: ID!
+  scopeId: ID!
+  createdBy: UserResponse!
+  name: String!
+  description: String
+  scopeType: RoleScope!
+  companyType: CompanyType!
+  isHidden: Boolean!
+  members: RoleMembersResponse
+  createdAt: Timestamp!
+  order: Int!
+}
+
+union RoleResponse = Role | GraphqlError
+
+type RolePayload {
+  items: [RoleResponse!]
+}
+
+union RolePayloadResponse = RolePayload | GraphqlError
+
+type RoleEdge {
+  cursor: String!
+  node: RoleResponse
+}
+
+type RoleConnection {
+  edges: [RoleEdge]
+  pageInfo: PageInfo!
+  totalCount: Int
+}
+
+union RoleConnectionResponse = RoleConnection | GraphqlError
+
+type RoleQuery {
+  listRoles(pageConfiguration: PageConfiguration, operations: Operations): RoleConnectionResponse!
+}
+
+type RoleMutation {
+  createRole(input: CreateRoleInput!): RolePayloadResponse!
+  updateRole(id: ID!, input: UpdateRoleInput!): RolePayloadResponse!
+  removeRole(id: ID!): BooleanResponse!
+  reOrderRole(roleId: ID!, to: Int!): BooleanResponse!
+}
+
+enum TaskStatus {
+  COMPLETED
+  INPROGRESS
+  PENDING
+}
+
+input CreateTaskInput {
+  name: String!
+  dueDate: Int
+  isInternal: Boolean
+}
+
+input UpdateTaskInput {
+  name: String
+  dueDate: Int
+}
+
+input MarkTaskInternalInput {
+  taskIds: [ID!]!
+  isInternal: Boolean!
+}
+
+input ChangeTaskStatusInput {
+  taskIds: [ID!]!
+  taskStatus: TaskStatus!
+}
+
+union Assignee = User | Placeholder | GraphqlError
+
+type Task implements Node {
+  id: ID!
+  name: String!
+  order: Int!
+  status: TaskStatus!
+  dueDate: Int!
+  milestoneId: ID
+  createdBy: UserResponse!
+  assignee: Assignee
+  notes: NotesResponse
+  subscribers(pageConfiguration: PageConfiguration, operations: Operations): UserConnectionResponse!
+  milestone: MilestoneResponse!
+  msp: MspResponse!
+  createdAt: Int!
+  analytics: TaskAnalyticsResponse
+  isInternal: Boolean!
+  assigneeType: AssigneeType
+}
+
+union TaskResponse = Task | GraphqlError
+
+type TaskEdge {
+  cursor: String!
+  node: TaskResponse
+}
+
+type TaskConnection {
+  edges: [TaskEdge]
+  pageInfo: PageInfo!
+  totalCount: Int
+}
+
+union TaskConnectionResponse = TaskConnection | GraphqlError
+
+type TaskAnalytics {
+  commentCount: IntResponse
+}
+
+union TaskAnalyticsResponse = TaskAnalytics | GraphqlError
+
+type TaskPayload {
+  items: [TaskResponse!]
+}
+
+union TaskPayloadResponse = TaskPayload | GraphqlError
+
+type TaskQuery {
+  getTasks(ids: [ID!]!): TaskPayloadResponse!
+  getTaskNotes(taskId: ID!): NotesResponse!
+  listTasks(pageConfiguration: PageConfiguration, operations: Operations): TaskConnectionResponse!
+  myTasks(pageConfiguration: PageConfiguration, operations: Operations): TaskConnectionResponse!
+  overdueTasks(pageConfiguration: PageConfiguration, operations: Operations): TaskConnectionResponse!
+  myTaskFilters: FilterItemsPayloadResponse
+}
+
+type TaskMutation {
+  createTask(milestoneId: ID!, input: CreateTaskInput!, order: Int): TaskPayloadResponse!
+  bulkCreateTasks(milestoneId: ID!, input: [CreateTaskInput!]!): TaskPayloadResponse!
+  updateTask(id: ID!, input: UpdateTaskInput!): TaskPayloadResponse!
+  deleteTask(id: ID!): BooleanResponse!
+  markTasksComplete(ids: [ID!]!): BooleanResponse!
+  markTasksPending(ids: [ID!]!): BooleanResponse!
+  changeTaskStatus(input: ChangeTaskStatusInput): BooleanResponse!
+  markAllTasksInMilestoneComplete(milestoneId: ID!): BooleanResponse!
+  markAllTasksInMilestonePending(milestoneId: ID!): BooleanResponse!
+  reOrderTask(taskId: ID!, to: Int!): BooleanResponse!
+  moveTasksInMilestone(taskIds: [ID!]!, milestoneId: ID!): [MilestoneResponse!]!
+  cloneTasks(taskIds: [ID!]!, milestoneId: ID!): TaskPayloadResponse!
+  addAssignee(userIdMap: UserIdMapInput, taskIds: [ID!]!): BooleanResponse!
+  removeAssignee(assigneeId: ID!, taskIds: [ID!]!): BooleanResponse!
+  createUserAndAssignToTasks(taskIds: [ID!]!, input: CreateUserInput!): UserPayloadResponse!
+  markTasksInternal(input: MarkTaskInternalInput): BooleanResponse!
+}
+
+input CreateMspTemplateInput {
+  opportunityId: ID
+  accountId: ID
+  name: String!
+  description: String
+  summary: CreateExecutiveSummaryInput
+  economicImpact: String
+  decisionCriteria: String
+  startDate: Int!
+  buyerCompanyId: ID
+  sellerCompanyId: ID
+  buyerCompanyName: String
+  buyerCompanyDisplayName: String
+  buyerCompanyLogo: CreateMediaInput
+  media: [CreateMediaInput]
+}
+
+input CreateMilestoneTemplateInput {
+  mspId: ID!
+  name: String
+  startDate: Int!
+  endDate: Int
+  isInternal: Boolean
+}
+
+type TemplateQuery {
+  searchMspTemplates(pageConfiguration: PageConfiguration, operations: Operations): MspConnectionResponse!
+  searchMilestoneTemplates(pageConfiguration: PageConfiguration, operations: Operations): MilestoneConnectionResponse!
+}
+
+type TemplateMutation {
+  createMspFromTemplate(templateId: ID!, input: CreateMspTemplateInput!): MspPayloadResponse!
+  createTemplateFromMsp(mspId: ID!): MspPayloadResponse!
+  createMilestoneFromTemplate(templateId: ID!, input: CreateMilestoneTemplateInput!): MilestonePayloadResponse!
+  createTemplateFromMilestone(milestoneId: ID!): MilestonePayloadResponse!
+}
+
+type Thumbnail implements Media {
+  id: ID!
+  orgId: ID!
+  createdBy: UserResponse!
+  name: String
+  fileName: String
+  fileSize: Int
+  description: String
+  mediaType: MediaType!
+  url: URL!
+  isInternal: Boolean @deprecated(reason: "Remove this field")
+  formats: JSON
+  mimeType: String
+  source: String
+  analytics: MediaAnalyticsResponse
+  createdAt: Timestamp!
+}
+
+enum UserSource {
+  KEYCLOAK
+  SALESFORCE
+}
+
+enum UserType {
+  BUYER
+  SELLER
+}
+
+enum AssigneeType {
+  PLACEHOLDER
+  USER
+}
+
+input CreateUserInput {
+  firstName: String
+  lastName: String
+  email: EmailAddress!
+  companyId: ID!
+}
+
+input TransferUserInput {
+  transfereeId: String!
+  transferredToId: String!
+}
+
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  email: EmailAddress
+}
+
+input UserIdMapInput {
+  id: ID
+  primaryId: ID
+  assigneeType: AssigneeType
+}
+
+type UserIdMap {
+  id: ID
+  primaryId: ID
+}
+
+interface IUser {
+  id: ID
+  firstName: String
+  lastName: String
+  company: CompanyResponse
+  email: EmailAddress!
+}
+
+type User implements IUser {
+  id: ID
+  primaryId: ID
+  firstName: String
+  lastName: String
+  company: CompanyResponse
+  userType: UserType!
+  source: UserSource!
+  email: EmailAddress!
+}
+
+union UserResponse = User | GraphqlError
+
+type UserEdge {
+  cursor: String
+  node: UserResponse
+}
+
+type UserConnection {
+  edges: [UserEdge]
+  pageInfo: PageInfo!
+  totalCount: Int
+}
+
+union UserConnectionResponse = UserConnection | GraphqlError
+
+type UserPayload {
+  items: [UserResponse!]
+}
+
+union UserPayloadResponse = UserPayload | GraphqlError
+
+type UserMutation {
+  createUser(input: CreateUserInput!): UserPayloadResponse!
+  updateUser(id: ID!, input: UpdateUserInput!): UserPayloadResponse!
+  deleteUser(id: ID!): BooleanResponse!
+  transferUser(input: TransferUserInput!): BooleanResponse!
+}
+
+type UserQuery {
+  getUsers(ids: [ID!]!): UserPayloadResponse!
+}
+
+input CreateUspInput {
+  mspId: String!
+  public: Boolean!
+  password: String
+}
+
+input UpdateUspInput {
+  public: Boolean
+  password: String
+}
+
+type Usp {
+  id: ID!
+  public: Boolean!
+  passwordVerification: Boolean!
+  password: String
+  link: String!
+}
+
+union UspResponse = Usp | GraphqlError
+
+type UspPayload {
+  items: [UspResponse!]
+}
+
+union UpsPayloadResponse = UspPayload | GraphqlError
+
+type UspMutation {
+  createUsp(input: CreateUspInput!): UpsPayloadResponse!
+  updateUsp(id: ID!, input: UpdateUspInput!): UpsPayloadResponse!
+}
+
+type Video implements Media & Assets {
+  id: ID!
+  orgId: ID!
+  createdBy: UserResponse!
+  name: String
+  fileName: String
+  fileSize: Int
+  description: String
+  mediaType: MediaType!
+  url: URL!
+  formats: JSON
+  thumbnail: Thumbnail
+  context: MediaContextResponse
+  mimeType: String
+  source: String
+  createdAt: Timestamp!
+  analytics: MediaAnalyticsResponse
+  isInternal: Boolean
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
